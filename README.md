@@ -40,4 +40,25 @@ Connection: close
 <!doctype html>
 <!-- omitted -->
 
+# Half-Open connections
 
+Each tcp connection direction is ended independently.
+Where on direction is closed and the other is still open.
+
+- First peer cannot send any more data, but cal still receive from second peer.
+- Second peer gets EOF, but can still send the first peer.
+
+```
+let server = net.createServer({allowHalfOpen: true});
+```
+
+# Dynamic buffer
+
+In a real TCP server, for await (const chunk of socket) gives you arbitrary chunks — not full messages.
+A client might send "hello\n" split across two packets, or three messages in one packet. 
+A dynamic buffer accumulates incoming bytes and extracts complete messages (typically delimited by \n).
+
+Network reality one logical message can arrive as:
+
+Packet 1: "hel"
+Packet 2: "lo\n"
